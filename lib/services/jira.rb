@@ -57,7 +57,8 @@ class Service::Jira < Service::Base
     if resp.status != 201
       raise "Jira Issue Create Failed: #{ resp[:status] }, body: #{ resp.body }"
     end
-    { :jira_story_id => JSON.parse(resp.body)['id'] }
+    body = JSON.parse(resp.body)
+    { :jira_story_id => body['id'], :jira_story_key => body['key'] }
   end
 
   def receive_verification(config, _)
