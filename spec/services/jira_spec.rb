@@ -70,7 +70,7 @@ describe Service::Jira do
     it 'should succeed upon successful api response' do
       test = Faraday.new do |builder|
         builder.adapter :test do |stub|
-          stub.post('/rest/api/2/project/project_key') { [201, {}, "{\"id\":\"foo\"}"] }
+          stub.post('/rest/api/2/project/project_key') { [201, {}, "{\"id\":\"foo\",\"key\":\"bar\"}"] }
           stub.get('/rest/api/2/project/project_key') { [200, {}, "{\"id\":12345}"] }
         end
       end
@@ -84,7 +84,7 @@ describe Service::Jira do
         .and_return(test.post('/rest/api/2/project/project_key'))
 
       resp = @service.receive_issue_impact_change(@config, @payload)
-      resp.should == { :jira_story_id => 'foo' }
+      resp.should == { :jira_story_id => 'foo', :jira_story_key => 'bar' }
     end
 
     it 'should fail upon unsuccessful api response' do
