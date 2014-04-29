@@ -72,7 +72,7 @@ class Service::Jira < Service::Base
       webhook_params = {
         'name' => "Crashlytics Issue sync",
         'url' => "http://localhost/HOOKS",
-        'events' => ['jiraissue_updated'],
+        'events' => ['jira:issue_updated'],
         'jqlFilter' => 'Project = #{project_key} AND resolution = Fixed',
         'excludeIssueDetails' => true }
 
