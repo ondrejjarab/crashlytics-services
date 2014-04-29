@@ -66,17 +66,15 @@ class Service::Jira < Service::Base
     project_key      = parsed[:project_key]
     http.ssl[:verify] = true
     http.basic_auth config[:username], config[:password]
-
+    asdas()
     resp = http_get "#{parsed[:url_prefix]}/rest/api/2/project/#{project_key}"
     if resp.status == 200
       webhook_params = {
-        "name" => "Crashlytics Issue sync",
-        "url" => "http://localhost:3000/HOOKS",
-        "events" => [
-          "issue_updated"
-        ],
-        "jqlFilter" => "Project = #{project_key} AND resolution = Fixed",
-        "excludeIssueDetails" => true
+        'name' => "Crashlytics Issue sync",
+        'url' => "http://localhost:3000/HOOKS",
+        'events' => ['issue_updated'],
+        'jqlFilter' => 'Project = #{project_key} AND resolution = Fixed',
+        'excludeIssueDetails' => true
       }
       webhook = http_post "#{parsed[:url_prefix]}/rest/webhooks/1.0/webhook", webhook_params
       [true,  "Successfully verified Jira settings"]
