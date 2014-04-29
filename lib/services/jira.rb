@@ -76,10 +76,11 @@ class Service::Jira < Service::Base
         'jqlFilter' => 'Project = #{project_key} AND resolution = Fixed',
         'excludeIssueDetails' => true }
 
-      webhook = http_post("#{parsed[:url_prefix]}/rest/webhooks/1.0/webhook" do |req|
+      webhook = http_post "#{parsed[:url_prefix]}/rest/webhooks/1.0/webhook" do |req|
         req.headers['Content-Type'] = 'application/json'
         req.body = webhook_params.to_json
       end
+
       if resp.status == 200 || resp.status == 201
         [true,  "Successfully verified Jira settings"]
       else
