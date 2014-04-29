@@ -77,7 +77,12 @@ class Service::Jira < Service::Base
         'excludeIssueDetails' => true
       }
       webhook = http_post "#{parsed[:url_prefix]}/rest/webhooks/1.0/webhook", webhook_params.to_query
-      [true,  "Successfully verified Jira settings"]
+      if resp.status == 200
+        [true,  "Successfully verified Jira settings"]
+      else
+        log "HTTP Error: webhook requests, status code: #{ webhook.status }, body: #{ webhook.body }"
+        [false, "Oops! Please check your settings again."]
+      end
     else
       log "HTTP Error: status code: #{ resp.status }, body: #{ resp.body }"
       [false, "Oops! Please check your settings again."]
