@@ -74,10 +74,13 @@ class Service::Jira < Service::Base
         'url' => "http://localhost:3000/HOOKS",
         'events' => ['issue_updated'],
         'jqlFilter' => 'Project = #{project_key} AND resolution = Fixed',
-        'excludeIssueDetails' => true
-      }
-      webhook = http_post "#{parsed[:url_prefix]}/rest/webhooks/1.0/webhook", webhook_params.to_query
-      if resp.status == 200
+        'excludeIssueDetails' => true }
+
+      webhook = http_post("#{parsed[:url_prefix]}/rest/webhooks/1.0/webhook" do |req|
+        req.headers['Content-Type'] = 'application/json'
+        req.body = webhook_params.to_json
+      end
+      if resp.status == 200 || resp.status == 201
         [true,  "Successfully verified Jira settings"]
       else
         log "HTTP Error: webhook requests, status code: #{ webhook.status }, body: #{ webhook.body }"
