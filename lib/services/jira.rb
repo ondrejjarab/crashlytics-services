@@ -69,16 +69,16 @@ class Service::Jira < Service::Base
 
     resp = http_get "#{parsed[:url_prefix]}/rest/api/2/project/#{project_key}"
     if resp.status == 200
-      # webhook_params = {
-      #   "name" => "Crashlytics Issue sync",
-      #   "url" => "http://localhost:3000/HOOKS",
-      #   "events" => [
-      #     "issue_updated"
-      #   ],
-      #   "jqlFilter" => "Project = #{project_key} AND resolution = Fixed",
-      #   "excludeIssueDetails" => true
-      # }
-      # webhook = http_post "#{parsed[:url_prefix]}/rest/webhooks/1.0/webhook", webhook_params
+      webhook_params = {
+        "name" => "Crashlytics Issue sync",
+        "url" => "http://localhost:3000/HOOKS",
+        "events" => [
+          "issue_updated"
+        ],
+        "jqlFilter" => "Project = #{project_key} AND resolution = Fixed",
+        "excludeIssueDetails" => true
+      }
+      webhook = http_post "#{parsed[:url_prefix]}/rest/webhooks/1.0/webhook", webhook_params
       [true,  "Successfully verified Jira settings"]
     else
       log "HTTP Error: status code: #{ resp.status }, body: #{ resp.body }"
