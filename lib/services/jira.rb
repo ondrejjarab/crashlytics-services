@@ -82,6 +82,7 @@ class Service::Jira < Service::Base
       end
 
       if resp.status == 200 || resp.status == 201
+        log "Webhook created, status code: #{ webhook.status }, body: #{ webhook.body }"
         [true,  "Successfully verified Jira settings"]
       else
         log "HTTP Error: webhook requests, status code: #{ webhook.status }, body: #{ webhook.body }"
