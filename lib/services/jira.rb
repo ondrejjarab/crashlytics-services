@@ -72,7 +72,7 @@ class Service::Jira < Service::Base
       webhook_params = {
         'name' => "Crashlytics Issue sync",
         'url' => "http://localhost/HOOKS",
-        'events' => ['issue_updated'],
+        'events' => ['jiraissue_updated'],
         'jqlFilter' => 'Project = #{project_key} AND resolution = Fixed',
         'excludeIssueDetails' => true }
 
@@ -81,8 +81,7 @@ class Service::Jira < Service::Base
         req.body = webhook_params.to_json
       end
 
-      if resp.status == 200 || resp.status == 201
-        log "Webhook created, status code: #{ webhook.status }, body: #{ webhook.body }"
+      if webhook.status == 200 || webhook.status == 201
         [true,  "Successfully verified Jira settings"]
       else
         log "HTTP Error: webhook requests, status code: #{ webhook.status }, body: #{ webhook.body }"
