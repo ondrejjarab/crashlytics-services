@@ -73,7 +73,7 @@ class Service::Jira < Service::Base
       if payload[:app]
         webhook_params = {
           'name' => "Crashlytics Issue sync",
-          'url' => "https://www.crashlytics.com/api/v2/organizations/payload[:app][:org_alias]/apps/payload[:app][:id]/webhook",
+          'url' => "https://www.crashlytics.com/api/v2/organizations/#{ payload[:app][:org_alias] }/apps/#{ payload[:app][:id] }/webhook",
           'events' => ['jira:issue_updated'],
           'jqlFilter' => 'Project = #{project_key} AND resolution = Fixed',
           'excludeIssueDetails' => true }
@@ -85,7 +85,7 @@ class Service::Jira < Service::Base
 
         unless webhook.status == 200 || webhook.status == 201
           #TODO: make sure it is OK to fail if webhook didnt work (needs jira admin account)
-          log "HTTP Error: webhook requests, status code: #{ webhook.status }, body: #{ webhook.body }"
+          log "HTTP Error: webhook requests, status code: #{ webhook.status }, body: #{ webhook.body }, params: #{ webhook_params.to_json }"
           verification_response = [true, "Successfully verified Jira settings but Jira's webhook could not be registered. You need to use an Admin account to set it up."]
         end
       end
