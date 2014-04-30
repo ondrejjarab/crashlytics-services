@@ -70,13 +70,15 @@ class Service::Jira < Service::Base
     resp = http_get "#{parsed[:url_prefix]}/rest/api/2/project/#{project_key}"
     if resp.status == 200
       verification_response = [true,  "Successfully verified Jira settings"]
+
+      # currently www does NOT send an app, use this as a temporary feature switch
+       # (ALSO using staging URL for now, needs to be changed to crashlytics.com)
       if payload[:app]
         webhook_params = {
           'name' => "Crashlytics Issue sync",
-          'url' => "https://www.crashlytics.com/api/v2/organizations/#{ payload[:organization][:id] }/apps/#{ payload[:app][:id] }/webhook",
+          'url' => "http://www-staging-duo2001.crash.io/api/v2/organizations/#{ payload[:organization][:id] }/apps/#{ payload[:app][:id] }/webhook",
           'events' => ['jira:issue_updated'],
-          'jqlFilter' => 'Project = #{project_key} AND resolution = Fixed',
-          'excludeIssueDetails' => true }
+          'excludeIssueDetails' => false }
 
         webhook = http_post "#{parsed[:url_prefix]}/rest/webhooks/1.0/webhook" do |req|
           req.headers['Content-Type'] = 'application/json'
