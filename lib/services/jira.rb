@@ -61,7 +61,7 @@ class Service::Jira < Service::Base
     { :jira_story_id => body['id'], :jira_story_key => body['key'] }
   end
 
-  def receive_verification(config, _)
+  def receive_verification(config, payload)
     parsed = parse_url config[:project_url]
     project_key      = parsed[:project_key]
     http.ssl[:verify] = true
@@ -69,24 +69,27 @@ class Service::Jira < Service::Base
 
     resp = http_get "#{parsed[:url_prefix]}/rest/api/2/project/#{project_key}"
     if resp.status == 200
-      webhook_params = {
-        'name' => "Crashlytics Issue sync",
-        'url' => "http://localhost/HOOKS",
-        'events' => ['jira:issue_updated'],
-        'jqlFilter' => 'Project = #{project_key} AND resolution = Fixed',
-        'excludeIssueDetails' => true }
+      verification_response = [true,  "Successfully verified Jira settings"]
+      if payload[:app]
+        webhook_params = {
+          'name' => "Crashlytics Issue sync",
+          'url' => "https://www.crashlytics.com/api/v2/organizations/payload[:app][:org_alias]/apps/payload[:app][:id]/webhook",
+          'events' => ['jira:issue_updated'],
+          'jqlFilter' => 'Project = #{project_key} AND resolution = Fixed',
+          'excludeIssueDetails' => true }
 
-      webhook = http_post "#{parsed[:url_prefix]}/rest/webhooks/1.0/webhook" do |req|
-        req.headers['Content-Type'] = 'application/json'
-        req.body = webhook_params.to_json
-      end
+        webhook = http_post "#{parsed[:url_prefix]}/rest/webhooks/1.0/webhook" do |req|
+          req.headers['Content-Type'] = 'application/json'
+          req.body = webhook_params.to_json
+        end
 
-      if webhook.status == 200 || webhook.status == 201
-        [true,  "Successfully verified Jira settings"]
-      else
-        log "HTTP Error: webhook requests, status code: #{ webhook.status }, body: #{ webhook.body }"
-        [false, "Oops! Please check your settings again."]
+        unless webhook.status == 200 || webhook.status == 201
+          #TODO: make sure it is OK to fail if webhook didnt work (needs jira admin account)
+          log "HTTP Error: webhook requests, status code: #{ webhook.status }, body: #{ webhook.body }"
+          verification_response = [true, "Successfully verified Jira settings but Jira's webhook could not be registered. You need to use an Admin account to set it up."]
+        end
       end
+      verification_response
     else
       log "HTTP Error: status code: #{ resp.status }, body: #{ resp.body }"
       [false, "Oops! Please check your settings again."]
