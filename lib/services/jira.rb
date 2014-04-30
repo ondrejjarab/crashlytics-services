@@ -73,7 +73,7 @@ class Service::Jira < Service::Base
       if payload[:app]
         webhook_params = {
           'name' => "Crashlytics Issue sync",
-          'url' => "https://www.crashlytics.com/api/v2/organizations/#{ payload[:app][:org_alias] }/apps/#{ payload[:app][:id] }/webhook",
+          'url' => "https://www.crashlytics.com/api/v2/organizations/#{ payload[:organization][:id] }/apps/#{ payload[:app][:id] }/webhook",
           'events' => ['jira:issue_updated'],
           'jqlFilter' => 'Project = #{project_key} AND resolution = Fixed',
           'excludeIssueDetails' => true }
